@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>mangolock</title>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #000;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+}
+
+#app {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 480px;
+  height: 480px;
+  background: #090909;
+  overflow: hidden;
+  touch-action: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 60px;
+}
+
+.greeting {
+  font-size: 15px;
+  font-weight: 300;
+  color: #888;
+  letter-spacing: 0.02em;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 88px);
+  grid-template-rows: repeat(3, 80px);
+  place-items: center;
+}
+
+.cap {
+  --a: 0deg;
+  width: 60px;
+  height: 23px;
+  border-radius: 100px;
+  background: #bfbfbf;
+  transform: rotate(var(--a));
+  transform-origin: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+  will-change: width, transform, opacity;
+}
+
+.cap.pop {
+  animation: cap-pop 0.42s ease forwards;
+  pointer-events: none;
+}
+
+@keyframes cap-pop {
+  0%   { width: 60px; transform: rotate(var(--a)) scale(1);     opacity: 1; }
+  42%  { width: 23px; transform: rotate(var(--a)) scale(1);     opacity: 1; }
+  56%  { width: 23px; transform: rotate(var(--a)) scale(1.08);  opacity: 1; }
+  100% { width: 23px; transform: rotate(var(--a)) scale(0);     opacity: 0; }
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <span class="greeting">Hello, fellow tinkerer!</span>
+  <div class="grid" id="g"></div>
+</div>
+<script>
+// row-major angles (deg) for 4×3 grid — matches reference screenshot
+var angles = [
+  90, -42,  0,  32,
+   0,  90, 28, -34,
+  38,   0, 28,  90
+];
+
+var g = document.getElementById('g');
+
+angles.forEach(function(a) {
+  var el = document.createElement('div');
+  el.className = 'cap';
+  el.style.setProperty('--a', a + 'deg');
+
+  el.addEventListener('pointerdown', function(e) {
+    e.preventDefault();
+    el.setPointerCapture(e.pointerId);
+    if (!el.classList.contains('pop')) el.classList.add('pop');
+  });
+
+  el.addEventListener('pointercancel', function() {
+    // nothing to clean up — animation already running
+  });
+
+  el.addEventListener('animationend', function() {
+    el.style.visibility = 'hidden';
+  });
+
+  g.appendChild(el);
+});
+</script>
+</body>
+</html>
