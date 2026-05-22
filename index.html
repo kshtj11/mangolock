@@ -44,10 +44,25 @@ body {
   display: grid;
   grid-template-columns: repeat(4, 88px);
   grid-template-rows: repeat(3, 80px);
-  place-items: center;
+  gap: 8px;
 }
 
-.cap {
+/* touch target — fills the full grid cell */
+.cap-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  touch-action: none;
+}
+
+.cap-cell.pop {
+  pointer-events: none;
+}
+
+/* visual-only capsule inside the touch target */
+.cap-vis {
   --a: 0deg;
   width: 60px;
   height: 23px;
@@ -55,15 +70,13 @@ body {
   background: #bfbfbf;
   transform: rotate(var(--a));
   transform-origin: center;
-  cursor: pointer;
-  user-select: none;
-  touch-action: none;
+  pointer-events: none;
+  flex-shrink: 0;
   will-change: width, transform, opacity;
 }
 
-.cap.pop {
+.cap-cell.pop .cap-vis {
   animation: cap-pop 0.42s ease forwards;
-  pointer-events: none;
 }
 
 @keyframes cap-pop {
@@ -90,25 +103,25 @@ var angles = [
 var g = document.getElementById('g');
 
 angles.forEach(function(a) {
-  var el = document.createElement('div');
-  el.className = 'cap';
-  el.style.setProperty('--a', a + 'deg');
+  var cell = document.createElement('div');
+  cell.className = 'cap-cell';
 
-  el.addEventListener('pointerdown', function(e) {
+  var vis = document.createElement('div');
+  vis.className = 'cap-vis';
+  vis.style.setProperty('--a', a + 'deg');
+  cell.appendChild(vis);
+
+  cell.addEventListener('pointerdown', function(e) {
     e.preventDefault();
-    el.setPointerCapture(e.pointerId);
-    if (!el.classList.contains('pop')) el.classList.add('pop');
+    cell.setPointerCapture(e.pointerId);
+    if (!cell.classList.contains('pop')) cell.classList.add('pop');
   });
 
-  el.addEventListener('pointercancel', function() {
-    // nothing to clean up — animation already running
+  vis.addEventListener('animationend', function() {
+    cell.style.visibility = 'hidden';
   });
 
-  el.addEventListener('animationend', function() {
-    el.style.visibility = 'hidden';
-  });
-
-  g.appendChild(el);
+  g.appendChild(cell);
 });
 </script>
 </body>
